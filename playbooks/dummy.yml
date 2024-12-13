@@ -1,0 +1,47 @@
+- hosts: localhost
+  tasks:
+    - set_fact:
+        base_name: "vm_{{ ansible_date_time.epoch }}"
+    - name: Create 2 VMs
+      vmware_guest:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        name: "{{ base_name }}_{{ item }}"
+        validate_certs: False
+        template: "{{ template }}"
+        datacenter: "{{ datacenter }}"
+        folder: "{{ folder }}"
+      with_items: [1,2]
+    - name: Power On 2 VMs
+      vmware_guest_powerstate:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        name: "{{ base_name }}_{{ item }}"
+        validate_certs: False
+        folder: "{{ folder }}"
+        state: powered-on
+      with_items: [1,2]
+    - name: Wait for sometime
+      pause:
+        seconds: 10
+    - name: Power Off 2 VMs
+      vmware_guest_powerstate:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        name: "{{ base_name }}_{{ item }}"
+        validate_certs: False
+        folder: "{{ folder }}"
+        state: powered-off
+      with_items: [1,2]
+    - name: Delete 2 VMs
+      vmware_guest:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        name: "{{ base_name }}_{{ item }}"
+        validate_certs: False
+        state: absent
+      with_items: [1,2]
